@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Astra AI Chat</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, sans-serif; }
+        body { background: #0d0d0d; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; }
+       
+        .chat-container { width: 100%; max-width: 600px; height: 80vh; background: #1a1a1a; border: 1px solid #333; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; }
+        .chat-header { background: #141414; padding: 15px; text-align: center; color: #ffc107; font-weight: bold; border-bottom: 1px solid #333; }
+       
+        .chat-box { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .message { max-width: 80%; padding: 10px 14px; border-radius: 10px; font-size: 0.9rem; line-height: 1.5; white-space: pre-wrap; }
+        .user-msg { background: #ffc107; color: #000; align-self: flex-start; }
+        .bot-msg { background: #2b2b2b; color: #fff; align-self: flex-end; border: 1px solid #444; }
+
+        .input-area { display: flex; padding: 10px; background: #141414; border-top: 1px solid #333; }
+        input { flex: 1; padding: 10px; background: #222; border: 1px solid #444; color: #fff; border-radius: 6px; outline: none; }
+        button { background: #ffc107; color: #000; border: none; padding: 10px 20px; margin-right: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="chat-container">
+        <div class="chat-header">Astra AI Assistant</div>
+        <div class="chat-box" id="chatBox">
+            <div class="message bot-msg">سلام! چطور می‌تونم کمکت کنم؟</div>
+        </div>
+        <div class="input-area">
+            <input type="text" id="userInput" placeholder="پیا‌مت رو بنویس..." onkeypress="if(event.key==='Enter') sendMessage()">
+            <button onclick="sendMessage()">ارسال</button>
+        </div>
+    </div>
+
+    <script>
+        async function sendMessage() {
+            const input = document.getElementById('userInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            const chatBox = document.getElementById('chatBox');
+
+            // افزودن پیام کاربر به صفحه
+            chatBox.innerHTML += `<div class="message user-msg">${message}</div>`;
+            input.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // پیام در حال پاسخ...
+            const loadingId = 'loading-' + Date.now();
+            chatBox.innerHTML += `<div class="message bot-msg" id="${loadingId}">در حال تایپ...</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // ارسال به پایتون
+            const res = await fetch('/ask', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: message })
+            });
+            const data = await res.json();
+
+            // جایگزینی پاسخ واقعی جمنای
+            document.getElementById(loadingId).innerText = data.response;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    </script>
+</body>
+</html>

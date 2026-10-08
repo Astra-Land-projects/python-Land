@@ -1,5 +1,5 @@
 #pip install openai pillow opencv-python#
-#$env:OPENAI_API_KEY="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"#
+
 import os
 import sys
 import base64

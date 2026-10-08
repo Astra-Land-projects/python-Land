@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Astra AI Chatbot</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #0d0d0d; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; }
+       
+        .chat-container { width: 100%; max-width: 600px; height: 80vh; background: #1a1a1a; border: 1px solid #333; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .chat-header { background: #141414; padding: 15px; text-align: center; color: #ffc107; font-weight: bold; font-size: 1.1rem; border-bottom: 1px solid #333; letter-spacing: 1px; }
+       
+        .chat-box { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .message { max-width: 80%; padding: 12px 16px; border-radius: 12px; font-size: 0.95rem; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+        .user-msg { background: #ffc107; color: #000; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .bot-msg { background: #2b2b2b; color: #fff; align-self: flex-start; border: 1px solid #444; border-bottom-left-radius: 2px; }
+
+        .input-area { display: flex; padding: 12px; background: #141414; border-top: 1px solid #333; gap: 10px; }
+        input { flex: 1; padding: 12px; background: #222; border: 1px solid #444; color: #fff; border-radius: 8px; outline: none; font-size: 0.95rem; }
+        input:focus { border-color: #ffc107; }
+        button { background: #ffc107; color: #000; border: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        button:hover { background: #e0a800; }
+    </style>
+</head>
+<body>
+
+    <div class="chat-container">
+        <div class="chat-header">ASTRA AI ASSISTANT</div>
+        <div class="chat-box" id="chatBox">
+            <div class="message bot-msg">Hello! How can I help you today?</div>
+        </div>
+        <div class="input-area">
+            <input type="text" id="userInput" placeholder="Type your message..." onkeypress="if(event.key==='Enter') sendMessage()">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        async function sendMessage() {
+            const input = document.getElementById('userInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            const chatBox = document.getElementById('chatBox');
+
+            // Append User Message
+            chatBox.innerHTML += `<div class="message user-msg">${escapeHtml(message)}</div>`;
+            input.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // Show Typing Indicator
+            const loadingId = 'loading-' + Date.now();
+            chatBox.innerHTML += `<div class="message bot-msg" id="${loadingId}">Typing...</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            try {
+                // Fetch response from Python Flask backend
+                const res = await fetch('/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message })
+                });
+                const data = await res.json();
+
+                // Replace typing indicator with AI response
+                document.getElementById(loadingId).innerText = data.response;
+            } catch (error) {
+                document.getElementById(loadingId).innerText = "Error: Could not connect to the server.";
+            }
+
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+    </script>
+</body>
+</html>
