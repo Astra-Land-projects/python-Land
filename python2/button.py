@@ -1,0 +1,13 @@
+from tkinter import *
+mywindow = Tk()
+frame = Frame(mywindow)
+frame.pack()
+bottomframe = Frame(mywindow)
+bottomframe.pack( side = 'bottom')
+redbutton = Button(Frame, text = 'Red', fg ='red')
+redbutton.pack( side = LEFT )
+bluebutton = Button(Frame, text ='Blue', fg ='blue')
+bluebutton.pack( side = LEFT )
+blackbutton = Button(bottomframe, text ='Black', fg ='black')
+blackbutton.pack( side = 'bottom')
+mywindow.mainloop()
